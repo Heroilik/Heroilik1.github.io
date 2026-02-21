@@ -176,6 +176,7 @@
             box-shadow: 0 30px 50px rgba(0,0,0,0.8), inset 0 0 40px rgba(159, 138, 192, 0.3);
             text-align: center;
             animation: menuFadeIn 0.4s ease-out;
+            max-width: 900px;
         }
 
         @keyframes menuFadeIn {
@@ -222,6 +223,155 @@
         .main-menu .menu-btn:active {
             transform: translateY(7px);
             box-shadow: 0 3px 0 #0a1a2a;
+        }
+
+        /* Меню ачивок */
+        .achievements-menu {
+            background: #0f1e2f;
+            border: 4px solid #ffaa44;
+            border-radius: 50px;
+            padding: 40px 60px;
+            box-shadow: 0 30px 50px rgba(0,0,0,0.8);
+            text-align: center;
+            max-width: 800px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .achievements-menu h2 {
+            color: #ffddaa;
+            font-size: 56px;
+            margin: 0 0 30px 0;
+            text-shadow: 0 0 20px #ffaa44;
+        }
+
+        .achievements-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            margin: 30px 0;
+        }
+
+        .achievement-card {
+            background: #1e2a3a;
+            border: 2px solid #7a6a9f;
+            border-radius: 30px;
+            padding: 20px 30px;
+            display: flex;
+            align-items: center;
+            gap: 30px;
+            transition: all 0.2s ease;
+        }
+
+        .achievement-card.unlocked {
+            border-color: #ffaa44;
+            background: #2a3a4a;
+            box-shadow: 0 0 20px rgba(255, 170, 68, 0.3);
+        }
+
+        .achievement-icon {
+            font-size: 48px;
+            min-width: 80px;
+            text-align: center;
+        }
+
+        .achievement-info {
+            flex: 1;
+            text-align: left;
+        }
+
+        .achievement-info h3 {
+            color: #ffddaa;
+            font-size: 28px;
+            margin: 0 0 5px 0;
+        }
+
+        .achievement-info p {
+            color: #aac8ff;
+            font-size: 18px;
+            margin: 0 0 10px 0;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 10px;
+            background: #0f1e2f;
+            border-radius: 5px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #4a90e2, #ffaa44);
+            transition: width 0.3s ease;
+        }
+
+        .progress-text {
+            color: #ffddaa;
+            font-size: 16px;
+            margin-top: 5px;
+            text-align: right;
+        }
+
+        .achievement-close-btn {
+            background: #4a3f6a;
+            border: 2px solid #9f8ac0;
+            border-radius: 40px;
+            padding: 15px 40px;
+            font-size: 24px;
+            color: #f0e0ff;
+            cursor: pointer;
+            margin-top: 20px;
+            box-shadow: 0 6px 0 #2a1e4a;
+        }
+
+        .achievement-close-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 0 #2a1e4a;
+        }
+
+        .achievement-close-btn:active {
+            transform: translateY(4px);
+            box-shadow: 0 2px 0 #2a1e4a;
+        }
+
+        /* Всплывающее уведомление об ачивке */
+        .achievement-popup {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #1e2a3a;
+            border: 3px solid #ffaa44;
+            border-radius: 30px;
+            padding: 20px 30px;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            box-shadow: 0 10px 30px rgba(255, 170, 68, 0.3);
+            transform: translateX(120%);
+            transition: transform 0.3s ease;
+            z-index: 2000;
+            max-width: 400px;
+        }
+
+        .achievement-popup.show {
+            transform: translateX(0);
+        }
+
+        .popup-icon {
+            font-size: 48px;
+        }
+
+        .popup-content h3 {
+            color: #ffddaa;
+            font-size: 24px;
+            margin: 0 0 5px 0;
+        }
+
+        .popup-content p {
+            color: #aac8ff;
+            font-size: 16px;
+            margin: 0;
         }
 
         /* Меню паузы */
@@ -491,7 +641,28 @@
         <div class="menu-buttons">
             <button class="menu-btn" id="infiniteModeBtn">♾️ Бесконечный режим</button>
             <button class="menu-btn" id="campaignModeBtn">📜 Кампания</button>
+            <button class="menu-btn" id="achievementsMenuBtn">🏆 Достижения</button>
         </div>
+    </div>
+</div>
+
+<!-- Меню ачивок -->
+<div class="overlay" id="achievementsMenu" style="display: none;">
+    <div class="achievements-menu">
+        <h2>🏆 ДОСТИЖЕНИЯ</h2>
+        <div class="achievements-grid" id="achievementsGrid">
+            <!-- Ачивки будут добавляться динамически -->
+        </div>
+        <button class="achievement-close-btn" id="closeAchievementsBtn">ЗАКРЫТЬ</button>
+    </div>
+</div>
+
+<!-- Всплывающее уведомление об ачивке -->
+<div class="achievement-popup" id="achievementPopup">
+    <div class="popup-icon" id="popupIcon">🏆</div>
+    <div class="popup-content">
+        <h3 id="popupTitle">Достижение получено!</h3>
+        <p id="popupDescription"></p>
     </div>
 </div>
 
@@ -596,6 +767,10 @@
         const gameContainer = document.getElementById('gameContainer');
         const infiniteModeBtn = document.getElementById('infiniteModeBtn');
         const campaignModeBtn = document.getElementById('campaignModeBtn');
+        const achievementsMenuBtn = document.getElementById('achievementsMenuBtn');
+        const achievementsMenu = document.getElementById('achievementsMenu');
+        const closeAchievementsBtn = document.getElementById('closeAchievementsBtn');
+        const achievementsGrid = document.getElementById('achievementsGrid');
         
         // Элементы результата
         const resultOverlay = document.getElementById('resultOverlay');
@@ -610,6 +785,12 @@
         const levelCompleteOverlay = document.getElementById('levelCompleteOverlay');
         const levelCompleteMessage = document.getElementById('levelCompleteMessage');
         const continueButton = document.getElementById('continueButton');
+        
+        // Элементы ачивок
+        const achievementPopup = document.getElementById('achievementPopup');
+        const popupIcon = document.getElementById('popupIcon');
+        const popupTitle = document.getElementById('popupTitle');
+        const popupDescription = document.getElementById('popupDescription');
         
         // Создаём аудио элементы
         const jazzAudio = new Audio();
@@ -632,7 +813,7 @@
         // Константы игры
         const MAX_STARS = 25;
         const STAR_RADIUS = 30;
-        const RED_STAR_RADIUS = 28; // Увеличено с 20 до 28
+        const RED_STAR_RADIUS = 28;
         const SPAWN_DELAY = 1500;
         const INITIAL_TIME = 3;
         const MAX_TIME = 10;
@@ -647,6 +828,255 @@
             { target: 25, time: 15, name: "Уровень 5 - Мастер" },
             { target: 0, time: 0, name: "Уровень 6 - БИТВА С БОССОМ", isBoss: true }
         ];
+
+        // ------ Система ачивок ------
+        const ACHIEVEMENTS = {
+            COSMONAUT: {
+                id: 'cosmonaut',
+                name: 'Космонавт',
+                description: 'Собрать 30 звезд в бесконечном режиме',
+                icon: '🚀',
+                condition: (stats) => stats.infiniteScore >= 30,
+                progress: (stats) => Math.min(100, Math.floor((stats.infiniteScore / 30) * 100)),
+                current: (stats) => stats.infiniteScore,
+                target: 30,
+                unlocked: false
+            },
+            COLLECTOR: {
+                id: 'collector',
+                name: 'Коллекционер',
+                description: 'Собрать 50 звезд в бесконечном режиме',
+                icon: '📦',
+                condition: (stats) => stats.infiniteScore >= 50,
+                progress: (stats) => Math.min(100, Math.floor((stats.infiniteScore / 50) * 100)),
+                current: (stats) => stats.infiniteScore,
+                target: 50,
+                unlocked: false
+            },
+            STAR_MASTER: {
+                id: 'starMaster',
+                name: 'Звездный мастер',
+                description: 'Собрать 100 звезд в бесконечном режиме',
+                icon: '👑',
+                condition: (stats) => stats.infiniteScore >= 100,
+                progress: (stats) => Math.min(100, Math.floor((stats.infiniteScore / 100) * 100)),
+                current: (stats) => stats.infiniteScore,
+                target: 100,
+                unlocked: false
+            },
+            CAMPAIGN_STARTER: {
+                id: 'campaignStarter',
+                name: 'Начинающий путешественник',
+                description: 'Пройдите первый уровень кампании',
+                icon: '🌍',
+                condition: (stats) => stats.completedLevels >= 1,
+                progress: (stats) => Math.min(100, Math.floor((stats.completedLevels / 1) * 100)),
+                current: (stats) => stats.completedLevels,
+                target: 1,
+                unlocked: false
+            },
+            CAMPAIGN_PRO: {
+                id: 'campaignPro',
+                name: 'Опытный исследователь',
+                description: 'Пройдите 3 уровня кампании',
+                icon: '🗺️',
+                condition: (stats) => stats.completedLevels >= 3,
+                progress: (stats) => Math.min(100, Math.floor((stats.completedLevels / 3) * 100)),
+                current: (stats) => stats.completedLevels,
+                target: 3,
+                unlocked: false
+            },
+            CAMPAIGN_MASTER: {
+                id: 'campaignMaster',
+                name: 'Мастер кампании',
+                description: 'Пройдите все уровни кампании',
+                icon: '🏆',
+                condition: (stats) => stats.completedLevels >= 6,
+                progress: (stats) => Math.min(100, Math.floor((stats.completedLevels / 6) * 100)),
+                current: (stats) => stats.completedLevels,
+                target: 6,
+                unlocked: false
+            },
+            BOSS_SLAYER: {
+                id: 'bossSlayer',
+                name: 'Победитель босса',
+                description: 'Победите босса на 6 уровне',
+                icon: '👾',
+                condition: (stats) => stats.bossDefeated,
+                progress: (stats) => stats.bossDefeated ? 100 : 0,
+                current: (stats) => stats.bossDefeated ? 1 : 0,
+                target: 1,
+                unlocked: false
+            },
+            QUICK_FINGERS: {
+                id: 'quickFingers',
+                name: 'Быстрые пальцы',
+                description: 'Соберите 10 звезд за одну игру в бесконечном режиме',
+                icon: '⚡',
+                condition: (stats) => stats.maxScorePerGame >= 10,
+                progress: (stats) => Math.min(100, Math.floor((stats.maxScorePerGame / 10) * 100)),
+                current: (stats) => stats.maxScorePerGame,
+                target: 10,
+                unlocked: false
+            },
+            STAR_COLLECTOR: {
+                id: 'starCollector',
+                name: 'Звездный коллекционер',
+                description: 'Соберите 25 звезд за одну игру в бесконечном режиме',
+                icon: '💫',
+                condition: (stats) => stats.maxScorePerGame >= 25,
+                progress: (stats) => Math.min(100, Math.floor((stats.maxScorePerGame / 25) * 100)),
+                current: (stats) => stats.maxScorePerGame,
+                target: 25,
+                unlocked: false
+            },
+            PERFECTIONIST: {
+                id: 'perfectionist',
+                name: 'Перфекционист',
+                description: 'Соберите все звезды на уровне (макс. 25)',
+                icon: '✨',
+                condition: (stats) => stats.maxStarsCollected >= 25,
+                progress: (stats) => Math.min(100, Math.floor((stats.maxStarsCollected / 25) * 100)),
+                current: (stats) => stats.maxStarsCollected,
+                target: 25,
+                unlocked: false
+            }
+        };
+
+        // Статистика игрока для ачивок
+        let playerStats = {
+            infiniteScore: 0,
+            completedLevels: 0,
+            bossDefeated: false,
+            maxScorePerGame: 0,
+            maxStarsCollected: 0
+        };
+
+        // Загружаем сохраненные ачивки и статистику
+        function loadAchievements() {
+            try {
+                // Загружаем разблокированные достижения
+                const savedUnlocked = localStorage.getItem('achievements_unlocked');
+                if (savedUnlocked) {
+                    unlockedAchievements = new Set(JSON.parse(savedUnlocked));
+                }
+                
+                // Загружаем статистику игрока
+                const savedStats = localStorage.getItem('achievements_stats');
+                if (savedStats) {
+                    const parsedStats = JSON.parse(savedStats);
+                    playerStats = { ...playerStats, ...parsedStats };
+                }
+                
+                // Обновляем статус ачивок
+                for (let key in ACHIEVEMENTS) {
+                    ACHIEVEMENTS[key].unlocked = unlockedAchievements.has(key);
+                }
+            } catch (e) {
+                console.log('Не удалось загрузить достижения', e);
+            }
+        }
+
+        // Сохраняем ачивки и статистику
+        function saveAchievements() {
+            try {
+                localStorage.setItem('achievements_unlocked', JSON.stringify([...unlockedAchievements]));
+                localStorage.setItem('achievements_stats', JSON.stringify(playerStats));
+            } catch (e) {
+                console.log('Не удалось сохранить достижения', e);
+            }
+        }
+
+        // Загружаем сохраненные ачивки
+        let unlockedAchievements = new Set();
+        loadAchievements();
+
+        // Функция показа уведомления об ачивке
+        function showAchievementPopup(achievement) {
+            popupIcon.textContent = achievement.icon;
+            popupTitle.textContent = '🎉 Достижение получено!';
+            popupDescription.textContent = `${achievement.name}: ${achievement.description}`;
+            
+            achievementPopup.classList.add('show');
+            
+            setTimeout(() => {
+                achievementPopup.classList.remove('show');
+            }, 5000);
+        }
+
+        // Функция проверки ачивок
+        function checkAchievements() {
+            let newUnlocks = false;
+            
+            for (let key in ACHIEVEMENTS) {
+                const ach = ACHIEVEMENTS[key];
+                if (!ach.unlocked && ach.condition(playerStats)) {
+                    ach.unlocked = true;
+                    unlockedAchievements.add(key);
+                    showAchievementPopup(ach);
+                    newUnlocks = true;
+                }
+            }
+            
+            if (newUnlocks) {
+                saveAchievements();
+            }
+            
+            // Обновляем отображение ачивок, если меню открыто
+            if (achievementsMenu.style.display === 'flex') {
+                renderAchievements();
+            }
+        }
+
+        // Функция отрисовки ачивок
+        function renderAchievements() {
+            achievementsGrid.innerHTML = '';
+            
+            for (let key in ACHIEVEMENTS) {
+                const ach = ACHIEVEMENTS[key];
+                const progress = ach.progress(playerStats);
+                const current = ach.current(playerStats);
+                
+                const card = document.createElement('div');
+                card.className = `achievement-card ${ach.unlocked ? 'unlocked' : ''}`;
+                
+                card.innerHTML = `
+                    <div class="achievement-icon">${ach.unlocked ? '🏆' : ach.icon}</div>
+                    <div class="achievement-info">
+                        <h3>${ach.name}</h3>
+                        <p>${ach.description}</p>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: ${progress}%"></div>
+                        </div>
+                        <div class="progress-text">${current}/${ach.target} (${progress}%)</div>
+                    </div>
+                `;
+                
+                achievementsGrid.appendChild(card);
+            }
+        }
+
+        // Функция обновления статистики
+        function updateStats() {
+            if (gameMode === 'infinite') {
+                const oldInfiniteScore = playerStats.infiniteScore;
+                const oldMaxScorePerGame = playerStats.maxScorePerGame;
+                const oldMaxStarsCollected = playerStats.maxStarsCollected;
+                
+                playerStats.infiniteScore = Math.max(playerStats.infiniteScore, score);
+                playerStats.maxScorePerGame = Math.max(playerStats.maxScorePerGame, score);
+                playerStats.maxStarsCollected = Math.max(playerStats.maxStarsCollected, stars.length);
+                
+                // Сохраняем только если статистика изменилась
+                if (oldInfiniteScore !== playerStats.infiniteScore || 
+                    oldMaxScorePerGame !== playerStats.maxScorePerGame || 
+                    oldMaxStarsCollected !== playerStats.maxStarsCollected) {
+                    saveAchievements();
+                }
+            }
+            
+            checkAchievements();
+        }
 
         // Переменные состояния
         let stars = [];
@@ -770,9 +1200,13 @@
             if (level.isBoss) {
                 if (bossHealth <= 0) {
                     // Победа над боссом
+                    playerStats.bossDefeated = true;
                     gameActive = false;
+                    clearInterval(timerInterval);
                     jazzAudio.pause();
+                    saveAchievements();
                     showVictory('ПОБЕДА!', 'Вы победили босса!');
+                    checkAchievements();
                 }
                 return;
             }
@@ -782,6 +1216,10 @@
                 gameActive = false;
                 clearInterval(timerInterval);
                 jazzAudio.pause();
+                
+                playerStats.completedLevels = Math.max(playerStats.completedLevels, currentLevel + 1);
+                saveAchievements();
+                checkAchievements();
                 
                 if (currentLevel < CAMPAIGN_LEVELS.length - 1) {
                     // Показываем окно продолжения
@@ -865,6 +1303,7 @@
             pauseOverlay.style.display = 'none';
             resultOverlay.style.display = 'none';
             levelCompleteOverlay.style.display = 'none';
+            achievementsMenu.style.display = 'none';
             
             mainMenu.style.display = 'flex';
         }
@@ -966,7 +1405,7 @@
                 y: 50,
                 rotation: 0,
                 alpha: 1,
-                speed: 0.7 // Фиксированная скорость 0.7
+                speed: 0.7
             };
         }
 
@@ -1011,6 +1450,8 @@
             scoreSpan.textContent = score + ' ⭐';
             if (gameMode === 'campaign') {
                 checkCampaignProgress();
+            } else {
+                updateStats();
             }
         }
 
@@ -1149,23 +1590,19 @@
             ctx.translate(boss.x, boss.y);
             ctx.rotate(Math.sin(boss.rotation) * 0.05);
             
-            // Корпус тарелки
             ctx.shadowColor = '#44aaff';
             ctx.shadowBlur = 30;
             
-            // Нижняя часть
             ctx.fillStyle = '#446688';
             ctx.beginPath();
             ctx.ellipse(0, 10, 70, 30, 0, 0, Math.PI * 2);
             ctx.fill();
             
-            // Верхняя часть (купол)
             ctx.fillStyle = '#88aadd';
             ctx.beginPath();
             ctx.ellipse(0, -10, 50, 25, 0, 0, Math.PI * 2);
             ctx.fill();
             
-            // Огни по краям
             ctx.fillStyle = '#ffaa44';
             ctx.shadowColor = '#ffaa44';
             for (let i = -2; i <= 2; i++) {
@@ -1175,7 +1612,6 @@
                 ctx.fill();
             }
             
-            // Антенна
             ctx.strokeStyle = '#aaccff';
             ctx.lineWidth = 3;
             ctx.beginPath();
@@ -1191,7 +1627,6 @@
             ctx.restore();
         }
 
-        // ------ отрисовка красной звезды ------
         function drawRedStar(star) {
             ctx.save();
             ctx.translate(star.x, star.y);
@@ -1201,7 +1636,6 @@
             ctx.shadowColor = '#ff4444';
             ctx.shadowBlur = 20;
             
-            // Рисуем красную звезду
             ctx.beginPath();
             for (let i = 0; i < 10; i++) {
                 const radius = i % 2 === 0 ? RED_STAR_RADIUS : RED_STAR_RADIUS * 0.4;
@@ -1225,7 +1659,6 @@
             ctx.restore();
         }
 
-        // ------ отрисовка обычной звезды ------
         function drawStar(star) {
             const points = 5;
             const outerRadius = STAR_RADIUS;
@@ -1273,7 +1706,6 @@
         function draw() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-            // Декоративный пол
             ctx.fillStyle = '#5f4f6f';
             ctx.globalAlpha = 0.2;
             ctx.beginPath();
@@ -1283,7 +1715,6 @@
             ctx.fill();
             ctx.globalAlpha = 1.0;
 
-            // Рисуем обычные звёзды
             for (let star of stars) {
                 if (star.alpha < 1) {
                     star.spawnProgress = Math.min(1, star.spawnProgress + 0.01);
@@ -1293,16 +1724,13 @@
                 drawStar(star);
             }
 
-            // Рисуем красные звёзды
             for (let star of redStars) {
                 star.rotation += 0.02;
                 drawRedStar(star);
             }
 
-            // Рисуем босса
             drawBoss();
 
-            // Рисуем собираемые звёзды
             for (let i = collectedStars.length - 1; i >= 0; i--) {
                 const star = collectedStars[i];
                 star.rotation += star.speed;
@@ -1343,12 +1771,10 @@
                 }
             }
 
-            // Сброс теней
             ctx.shadowBlur = 0;
             ctx.shadowColor = 'transparent';
             ctx.globalAlpha = 1.0;
 
-            // Счётчик звёзд
             ctx.font = '18px "Segoe UI", monospace';
             ctx.fillStyle = '#e6d0ff';
             ctx.shadowBlur = 8;
@@ -1371,7 +1797,6 @@
         function updateBossLevel() {
             if (!boss || !gameActive || isPaused) return;
             
-            // Спавн красных звезд (максимум 5)
             redStarSpawnTimer++;
             if (redStarSpawnTimer > 40) {
                 redStarSpawnTimer = 0;
@@ -1380,12 +1805,10 @@
                 }
             }
             
-            // Движение красных звезд вниз
             for (let i = redStars.length - 1; i >= 0; i--) {
                 const star = redStars[i];
                 star.y += star.speed;
                 
-                // Проверка достижения низа
                 if (star.y > canvas.height - RED_STAR_RADIUS) {
                     gameActive = false;
                     jazzAudio.pause();
@@ -1427,6 +1850,17 @@
                 mainMenu.style.display = 'none';
                 gameContainer.style.display = 'block';
                 startCampaignMode();
+            });
+            
+            achievementsMenuBtn.addEventListener('click', () => {
+                mainMenu.style.display = 'none';
+                achievementsMenu.style.display = 'flex';
+                renderAchievements();
+            });
+            
+            closeAchievementsBtn.addEventListener('click', () => {
+                achievementsMenu.style.display = 'none';
+                mainMenu.style.display = 'flex';
             });
 
             // Игровые обработчики
@@ -1475,6 +1909,11 @@
             document.addEventListener('keydown', (e) => {
                 if (e.key === 'Escape') {
                     if (mainMenu.style.display === 'flex') return;
+                    if (achievementsMenu.style.display === 'flex') {
+                        achievementsMenu.style.display = 'none';
+                        mainMenu.style.display = 'flex';
+                        return;
+                    }
                     if (isPaused) {
                         closePauseMenu();
                     } else if (gameActive && resultOverlay.style.display !== 'flex' && levelCompleteOverlay.style.display !== 'flex') {
@@ -1496,4 +1935,3 @@
 </script>
 </body>
 </html>
-
